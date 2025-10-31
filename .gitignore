@@ -1,0 +1,14 @@
+go.sum
+
+bin/
+*.exe
+*.out
+
+.vscode/
+
+conf/
+
+kv/
+
+logs/
+*.log
