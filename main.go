@@ -12,6 +12,7 @@ import (
 	"github.com/nurhudajoantama/stthmauto/internal/config"
 	"github.com/nurhudajoantama/stthmauto/internal/instrumentation"
 	"github.com/nurhudajoantama/stthmauto/internal/postgres"
+	"github.com/nurhudajoantama/stthmauto/internal/rabbitmq"
 
 	log "github.com/rs/zerolog/log"
 )
@@ -34,13 +35,18 @@ func main() {
 	// initialize bbolt
 	gormPostgres := postgres.NewGorm(config.DB)
 
+	// initialize rabbitmq
+	rabbitMQConn := rabbitmq.NewRabbitMQConn(config.MQTT)
+	defer rabbitMQConn.Close()
+
 	// initialize server
 	srv := server.New(config.HTTP.Addr())
 
 	// HTSTT
 	{
 		hmsttStore := hmstt.NewStore(gormPostgres)
-		hmsttService := hmstt.NewService(hmsttStore)
+		hmsttEvent := hmstt.NewEvent(rabbitMQConn)
+		hmsttService := hmstt.NewService(hmsttStore, hmsttEvent)
 		hmstt.RegisterHandlers(srv, hmsttService)
 	}
 

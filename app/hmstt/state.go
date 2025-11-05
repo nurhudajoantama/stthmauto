@@ -1,6 +1,9 @@
 package hmstt
 
 const (
+	MQ_CHANNEL_HMSTT = "hmstt_channel"
+	PREFIX_HMSTT     = "hmstt"
+
 	STATE_OFF = "off"
 	STATE_ON  = "on"
 

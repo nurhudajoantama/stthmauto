@@ -40,8 +40,20 @@ func (s SQL) DataSourceName() string {
 		s.User, s.Password, s.Host, s.Port, s.Name)
 }
 
+type MQTT struct {
+	User     string `yaml:"user"`
+	Password string `yaml:"password"`
+	Host     string `yaml:"host"`
+	Port     string `yaml:"port"`
+}
+
+func (m MQTT) BrokerURL() string {
+	return fmt.Sprintf("amqp://%s:%s@%s:%s/", m.User, m.Password, m.Host, m.Port)
+}
+
 type Config struct {
 	HTTP TCPServer `yaml:"http"`
 	Log  Logging   `yaml:"log"`
 	DB   SQL       `yaml:"db"`
+	MQTT MQTT      `yaml:"mqtt"`
 }

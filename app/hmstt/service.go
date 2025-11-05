@@ -4,11 +4,13 @@ import "context"
 
 type hmsttService struct {
 	store *hmsttStore
+	event *hmsttEvent
 }
 
-func NewService(hmsttStore *hmsttStore) *hmsttService {
+func NewService(hmsttStore *hmsttStore, hmsttEvent *hmsttEvent) *hmsttService {
 	return &hmsttService{
 		store: hmsttStore,
+		event: hmsttEvent,
 	}
 }
 
@@ -28,5 +30,18 @@ func (s *hmsttService) GetState(ctx context.Context, state ...string) (map[strin
 	}
 
 	return result, nil
+}
 
+func (s *hmsttService) SetState(ctx context.Context, key string, value string) error {
+	err := s.store.SetState(ctx, key, value)
+	if err != nil {
+		return err
+	}
+
+	err = s.event.StateChange(ctx, key, value)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

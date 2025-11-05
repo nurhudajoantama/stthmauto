@@ -10,10 +10,6 @@ type hmsttStore struct {
 	db *gorm.DB
 }
 
-const (
-	PREFIX_HMSTT = "hmstt"
-)
-
 func NewStore(db *gorm.DB) *hmsttStore {
 	// Auto migrate the hmsttState model
 	db.AutoMigrate(&hmsttState{})
