@@ -20,12 +20,28 @@ type Logging struct {
 	LogFilePath    string `yaml:"logFilePath"`
 }
 
-type KVBolt struct {
-	Path string `yaml:"path"`
+type SQL struct {
+	User        string `yaml:"user"`
+	Password    string `yaml:"password"`
+	Host        string `yaml:"host"`
+	Name        string `yaml:"name"`
+	Port        string `yaml:"port"`
+	MaxIdleConn int    `yaml:"maxIdleConn"`
+	MaxOpenConn int    `yaml:"maxOpenConn"`
+}
+
+func (s SQL) DatabaseUrl() string {
+	return fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable",
+		s.User, s.Password, s.Host, s.Port, s.Name)
+}
+
+func (s SQL) DataSourceName() string {
+	return fmt.Sprintf("user=%s password=%s host=%s port=%s dbname=%s sslmode=disable",
+		s.User, s.Password, s.Host, s.Port, s.Name)
 }
 
 type Config struct {
 	HTTP TCPServer `yaml:"http"`
 	Log  Logging   `yaml:"log"`
-	KV   KVBolt    `yaml:"kv"`
+	DB   SQL       `yaml:"db"`
 }

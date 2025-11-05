@@ -3,55 +3,45 @@ package hmstt
 import (
 	"context"
 
-	"github.com/rs/zerolog/log"
-
-	bolt "go.etcd.io/bbolt"
+	"gorm.io/gorm"
 )
 
 type hmsttStore struct {
-	db *bolt.DB
+	db *gorm.DB
 }
 
 const (
-	KV_BUCKET_HMSTT = "hmstt"
-	PREFIX_HMSTT    = "hmstt"
+	PREFIX_HMSTT = "hmstt"
 )
 
-func NewStore(db *bolt.DB) *hmsttStore {
-	db.Update(func(tx *bolt.Tx) error {
-		_, err := tx.CreateBucketIfNotExists([]byte(KV_BUCKET_HMSTT))
-		log.Err(err).Msgf("Initialized bucket %s for HMSTT store", KV_BUCKET_HMSTT)
-		return err
-	})
-	log.Info().Msg("HMSTT store initialized")
+func NewStore(db *gorm.DB) *hmsttStore {
+	// Auto migrate the hmsttState model
+	db.AutoMigrate(&hmsttState{})
+
 	return &hmsttStore{db: db}
 }
 
 func (s *hmsttStore) SetState(ctx context.Context, key string, value string) error {
-	return s.db.Update(func(tx *bolt.Tx) error {
-		b := tx.Bucket([]byte(KV_BUCKET_HMSTT))
-		return b.Put(generateKey(key), []byte(value))
-	})
+	state := &hmsttState{
+		Key:   generateKey(key),
+		Value: value,
+	}
+	return s.db.WithContext(ctx).Save(state).Error
 }
 
 func (s *hmsttStore) GetState(ctx context.Context, key string) (string, error) {
-	var result string
-	err := s.db.View(func(tx *bolt.Tx) error {
-		b := tx.Bucket([]byte(KV_BUCKET_HMSTT))
-		val := b.Get(generateKey(key))
-		if val != nil {
-			result = string(val)
-		}
-		return nil
-	})
-
-	return result, err
+	var state hmsttState
+	err := s.db.WithContext(ctx).First(&state, "key = ?", generateKey(key)).Error
+	if err != nil {
+		return "", err
+	}
+	return state.Value, nil
 }
 
-func generateKey(parts ...string) []byte {
+func generateKey(parts ...string) string {
 	key := PREFIX_HMSTT + "_"
 	for _, part := range parts {
 		key += part + "_"
 	}
-	return []byte(key)
+	return key
 }

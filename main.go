@@ -9,9 +9,9 @@ import (
 
 	"github.com/nurhudajoantama/stthmauto/app/hmstt"
 	"github.com/nurhudajoantama/stthmauto/app/server"
-	"github.com/nurhudajoantama/stthmauto/internal/bbolt"
 	"github.com/nurhudajoantama/stthmauto/internal/config"
 	"github.com/nurhudajoantama/stthmauto/internal/instrumentation"
+	"github.com/nurhudajoantama/stthmauto/internal/postgres"
 
 	log "github.com/rs/zerolog/log"
 )
@@ -32,14 +32,14 @@ func main() {
 	defer cleanupLog()
 
 	// initialize bbolt
-	bboltDB := bbolt.InitializeBolt(config.KV)
+	gormPostgres := postgres.NewGorm(config.DB)
 
 	// initialize server
 	srv := server.New(config.HTTP.Addr())
 
 	// HTSTT
 	{
-		hmsttStore := hmstt.NewStore(bboltDB)
+		hmsttStore := hmstt.NewStore(gormPostgres)
 		hmsttService := hmstt.NewService(hmsttStore)
 		hmstt.RegisterHandlers(srv, hmsttService)
 	}
@@ -68,6 +68,6 @@ func main() {
 		}
 		log.Info().Msg("server stopped")
 
-		bbolt.CloseBolt(shutdownCtx, bboltDB)
+		// bbolt.CloseBolt(shutdownCtx, bboltDB)
 	}
 }
