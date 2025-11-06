@@ -44,17 +44,21 @@ func (s *hmsttService) SetState(ctx context.Context, tipe, key, value string) er
 		return errors.New("INVALID TYPE OR KEY")
 	}
 
-	err := s.store.SetState(ctx, generatedKey, value)
+	tx := s.store.Transaction()
+	err := s.store.SetStateTx(ctx, tx, generatedKey, value)
 	if err != nil {
 		log.Error().Err(err).Msg("SetState failed")
+		s.store.Rollback(tx)
 		return errors.New("SET STATE ERROR")
 	}
 
-	// err = s.event.StateChange(ctx, key, value)
-	// if err != nil {
-	// 	log.Error().Err(err).Msg("StateChange failed")
-	// 	return errors.New("STATE CHANGE ERROR")
-	// }
+	err = s.event.StateChange(ctx, key, value)
+	if err != nil {
+		log.Error().Err(err).Msg("StateChange failed")
+		s.store.Rollback(tx)
+		return errors.New("STATE CHANGE ERROR")
+	}
+	s.store.Commit(tx)
 
 	return nil
 }

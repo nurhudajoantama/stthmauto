@@ -37,7 +37,7 @@ func main() {
 
 	// initialize rabbitmq
 	rabbitMQConn := rabbitmq.NewRabbitMQConn(config.MQTT)
-	defer rabbitMQConn.Close()
+	// defer rabbitMQConn.Close()
 
 	// initialize server
 	srv := server.New(config.HTTP.Addr())
@@ -73,7 +73,5 @@ func main() {
 			log.Error().Err(err).Msg("failed to gracefully shutdown server")
 		}
 		log.Info().Msg("server stopped")
-
-		// bbolt.CloseBolt(shutdownCtx, bboltDB)
 	}
 }

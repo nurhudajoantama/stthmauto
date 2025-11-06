@@ -18,6 +18,8 @@ const (
 	STATE_SWITCH_4 = "4"
 
 	ERR_STRING = "ERR"
+
+	KEY_DELIMITER = "."
 )
 
 var (

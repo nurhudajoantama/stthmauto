@@ -11,29 +11,12 @@ import (
 
 type hmsttEvent struct {
 	ch *amqp.Channel
-	q  *amqp.Queue
 }
 
 func NewEvent(conn *amqp.Connection) *hmsttEvent {
-
 	ch := rabbitmq.NewRabbitMQChannel(conn)
-
-	q, err := ch.QueueDeclare(
-		MQ_CHANNEL_HMSTT, // name
-		false,            // durable
-		true,             // delete when unused
-		false,            // exclusive
-		false,            // no-wait
-		nil,              // arguments
-	)
-	if err != nil {
-		log.Error().Err(err).Msg("Failed to declare a queue")
-		return nil
-	}
-
 	return &hmsttEvent{
 		ch: ch,
-		q:  &q,
 	}
 }
 
@@ -43,15 +26,18 @@ func (e *hmsttEvent) StateChange(ctx context.Context, key string, value string) 
 
 	err := e.ch.PublishWithContext(
 		ctx,
-		"",       // exchange
-		e.q.Name, // routing key
-		false,    // mandatory
-		true,     // immediate
+		"amq.topic",      // exchange
+		MQ_CHANNEL_HMSTT, // routing key
+		false,            // mandatory
+		false,            // immediate
 		amqp.Publishing{
 			ContentType: "text/plain",
 			Body:        []byte(value),
 		},
 	)
+	if err != nil {
+		log.Error().Err(err).Msg("Failed to publish a message")
+	}
 
 	return err
 }

@@ -54,31 +54,19 @@ func (h *hmsttHandler) handleIndex(w http.ResponseWriter, r *http.Request) {
 
 // handleState is another HTMX endpoint returning an HTML string
 func (h *hmsttHandler) handleGetStateHTML(w http.ResponseWriter, r *http.Request) {
-
 	p := mux.Vars(r)
 	key := p["key"]
 	tipe := p["type"]
 
-	var templateData = map[string]string{
-		"tipe": tipe,
-		"key":  key,
-	}
-
+	var state string
 	results, err := h.service.GetState(r.Context(), tipe, key)
 	if err != nil {
-		templateData["state"] = ERR_STRING
+		state = ERR_STRING
 	} else {
-		templateData["state"] = results
+		state = results
 	}
 
-	templateFileName, ok := TYPE_TEMPLATES[tipe]
-	if !ok {
-		templateFileName = HTML_TEMPLATE_NOTFOUND_TYPE
-	}
-
-	if err := h.templates.ExecuteTemplate(w, templateFileName, templateData); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
+	h.returnStateHTML(w, tipe, key, state)
 }
 
 func (h *hmsttHandler) handleSetStateHTML(w http.ResponseWriter, r *http.Request) {
@@ -105,7 +93,33 @@ func (h *hmsttHandler) handleSetStateHTML(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	w.WriteHeader(http.StatusNoContent)
+	var state string
+	results, err := h.service.GetState(r.Context(), tipe, key)
+	if err != nil {
+		state = ERR_STRING
+	} else {
+		state = results
+	}
+
+	h.returnStateHTML(w, tipe, key, state)
+}
+
+func (h *hmsttHandler) returnStateHTML(w http.ResponseWriter, tipe, key, state string) {
+	var templateData = map[string]string{
+		"tipe":  tipe,
+		"key":   key,
+		"state": state,
+	}
+
+	templateFileName, ok := TYPE_TEMPLATES[tipe]
+	if !ok {
+		templateFileName = HTML_TEMPLATE_NOTFOUND_TYPE
+	}
+
+	if err := h.templates.ExecuteTemplate(w, templateFileName, templateData); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
 
 func returnErrorState(w http.ResponseWriter) {

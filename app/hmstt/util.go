@@ -11,7 +11,7 @@ func generateKey(tipe, key string) (string, bool) {
 		ok = true
 	}
 
-	return PREFIX_HMSTT + "_" + tipe + "_" + key, ok
+	return PREFIX_HMSTT + KEY_DELIMITER + tipe + KEY_DELIMITER + key, ok
 }
 
 func canTypeChangedWithKey(tipe, key, value string) (string, bool) {

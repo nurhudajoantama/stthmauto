@@ -1,19 +1,37 @@
-<!-- TAMPILKAN SEMUA DATA DULU -->
-<ul>
-    <li>Type: {{.tipe}}</li>
-    <li>Key: {{.key}}</li>
-    <li>State: {{.state}}</li>
-</ul>
+<form hx-post="/hmstt/setstatehtml/switch/{{.key}}" hx-swap="outerHTML" class="d-inline">
 
-<!-- BERIKUTNYA BIKIN BUTTON UNTUK SWITCH ON/OFF -->
-<form hx-post="/hmstt/setstatehtml/switch/{{.key}}" hx-target="#hmstt_switch_{{.key}}" hx-swap="outerHTML">
-    {{if eq .state "on"}}
-    <input type="hidden" name="value" value="off" />
-    <button type="submit" class="btn btn-danger">Turn OFF</button>
-    {{else if eq .state "off"}}
-    <input type="hidden" name="value" value="on" />
-    <button type="submit" class="btn btn-success">Turn ON</button>
-    {{else}}
-    <span class="text-danger">Error: Unknown State</span>
-    {{end}}
+    <!-- BERIKUTNYA BIKIN BUTTON UNTUK SWITCH ON/OFF -->
+    <div class="card col-md-3">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <div>
+                <strong>{{.key | html}}</strong>
+            </div>
+            <div>
+                {{if eq .state "on"}}
+                <span class="badge bg-success">ON</span>
+                {{else if eq .state "off"}}
+                <span class="badge bg-secondary">OFF</span>
+                {{else}}
+                <span class="badge bg-warning text-dark">Unknown</span>
+                {{end}}
+            </div>
+        </div>
+
+        <div class="card-body">
+            {{if eq .state "on"}}
+            <input type="hidden" name="value" value="off" />
+            <button type="submit" class="btn btn-danger">
+                <i class="bi bi-power"></i> Turn OFF
+            </button>
+            {{else if eq .state "off"}}
+            <input type="hidden" name="value" value="on" />
+            <button type="submit" class="btn btn-success">
+                <i class="bi bi-power"></i> Turn ON
+            </button>
+            {{else}}
+            <div class="text-danger">Error: Unknown State</div>
+            {{end}}
+        </div>
+    </div>
+
 </form>
