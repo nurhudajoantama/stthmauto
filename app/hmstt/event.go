@@ -24,12 +24,14 @@ func (e *hmsttEvent) StateChange(ctx context.Context, key string, value string) 
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
+	routing := MQ_CHANNEL_HMSTT + KEY_DELIMITER + key
+
 	err := e.ch.PublishWithContext(
 		ctx,
-		"amq.topic",      // exchange
-		MQ_CHANNEL_HMSTT, // routing key
-		false,            // mandatory
-		false,            // immediate
+		"amq.topic", // exchange
+		routing,     // routing key
+		false,       // mandatory
+		false,       // immediate
 		amqp.Publishing{
 			ContentType: "text/plain",
 			Body:        []byte(value),
@@ -38,6 +40,7 @@ func (e *hmsttEvent) StateChange(ctx context.Context, key string, value string) 
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to publish a message")
 	}
+	log.Info().Str("key", routing).Str("value", value).Msg("Published state change event")
 
 	return err
 }
