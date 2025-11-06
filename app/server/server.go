@@ -22,8 +22,6 @@ type Server struct {
 func New(addr string) *Server {
 	r := mux.NewRouter()
 
-	r.Use(setResponseHeadersMiddleware)
-
 	r.Use(hlog.NewHandler(log.Logger))
 	r.Use(hlog.AccessHandler(func(r *http.Request, status, size int, duration time.Duration) {
 		hlog.FromRequest(r).Info().
@@ -38,7 +36,7 @@ func New(addr string) *Server {
 	r.Use(hlog.RemoteAddrHandler("ip"))
 	r.Use(hlog.UserAgentHandler("user_agent"))
 	r.Use(hlog.RefererHandler("referer"))
-	r.Use(hlog.RequestIDHandler("request_id", REQUEST_ID_KEY))
+	r.Use(hlog.RequestIDHandler("request_id", "X-Request-ID"))
 
 	// public routes
 	r.HandleFunc("/healthz", healthHandler).Methods("GET")

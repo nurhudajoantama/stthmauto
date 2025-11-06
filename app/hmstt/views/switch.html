@@ -1,0 +1,19 @@
+<!-- TAMPILKAN SEMUA DATA DULU -->
+<ul>
+    <li>Type: {{.tipe}}</li>
+    <li>Key: {{.key}}</li>
+    <li>State: {{.state}}</li>
+</ul>
+
+<!-- BERIKUTNYA BIKIN BUTTON UNTUK SWITCH ON/OFF -->
+<form hx-post="/hmstt/setstatehtml/switch/{{.key}}" hx-target="#hmstt_switch_{{.key}}" hx-swap="outerHTML">
+    {{if eq .state "on"}}
+    <input type="hidden" name="value" value="off" />
+    <button type="submit" class="btn btn-danger">Turn OFF</button>
+    {{else if eq .state "off"}}
+    <input type="hidden" name="value" value="on" />
+    <button type="submit" class="btn btn-success">Turn ON</button>
+    {{else}}
+    <span class="text-danger">Error: Unknown State</span>
+    {{end}}
+</form>

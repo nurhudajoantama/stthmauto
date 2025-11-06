@@ -19,7 +19,7 @@ func NewStore(db *gorm.DB) *hmsttStore {
 
 func (s *hmsttStore) SetState(ctx context.Context, key string, value string) error {
 	state := &hmsttState{
-		Key:   generateKey(key),
+		Key:   key,
 		Value: value,
 	}
 	return s.db.WithContext(ctx).Save(state).Error
@@ -27,17 +27,9 @@ func (s *hmsttStore) SetState(ctx context.Context, key string, value string) err
 
 func (s *hmsttStore) GetState(ctx context.Context, key string) (string, error) {
 	var state hmsttState
-	err := s.db.WithContext(ctx).First(&state, "key = ?", generateKey(key)).Error
+	err := s.db.WithContext(ctx).First(&state, "key = ?", key).Error
 	if err != nil {
 		return "", err
 	}
 	return state.Value, nil
-}
-
-func generateKey(parts ...string) string {
-	key := PREFIX_HMSTT + "_"
-	for _, part := range parts {
-		key += part + "_"
-	}
-	return key
 }
