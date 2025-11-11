@@ -13,7 +13,6 @@ pipeline {
     SSH_CREDENTIALS_ID = "${env.SSH_CREDENTIALS_ID ?: 'deploy-ssh1'}"
     // Service restart configuration
     SERVICE_NAME = "${env.SERVICE_NAME ?: 'hmstt'}"
-    RESTART_WITH_SUDO = "${env.RESTART_WITH_SUDO ?: 'true'}"
   }
 
   stages {
@@ -77,7 +76,7 @@ pipeline {
               # Extract views on remote and set executable bit for binary
               # Extract views and restart the service on the remote host. RESTART_WITH_SUDO controls whether sudo is used.
               ssh -o StrictHostKeyChecking=no ${REMOTE_USER}@${REMOTE_HOST} \
-                "mkdir -p ${REMOTE_PATH} && cd ${REMOTE_PATH} && tar -xzf views-hmstt.tar.gz && chmod +x ${BINARY_NAME} && \"if [ '${RESTART_WITH_SUDO}' = 'true' ]; then sudo systemctl restart ${SERVICE_NAME}; else systemctl restart ${SERVICE_NAME}; fi\""
+                "mkdir -p ${REMOTE_PATH} && cd ${REMOTE_PATH} && tar -xzf views-hmstt.tar.gz && chmod +x ${BINARY_NAME} && systemctl restart ${SERVICE_NAME}"
             '''
           }
         }
