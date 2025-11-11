@@ -11,6 +11,9 @@ pipeline {
     REMOTE_USER = "${env.REMOTE_USER ?: 'deploy'}"
     REMOTE_PATH = "${env.REMOTE_PATH ?: '/opt/stthmauto'}"
     SSH_CREDENTIALS_ID = "${env.SSH_CREDENTIALS_ID ?: 'deploy-ssh1'}"
+    // Service restart configuration
+    SERVICE_NAME = "${env.SERVICE_NAME ?: 'hmstt'}"
+    RESTART_WITH_SUDO = "${env.RESTART_WITH_SUDO ?: 'true'}"
   }
 
   stages {
@@ -43,18 +46,6 @@ pipeline {
       }
     }
 
-    stage('Package Views') {
-      steps {
-        sh '''
-          # Package the views folder (only the hmstt view)
-          tar -czf views-hmstt.tar.gz -C views hmstt
-          ls -lh views-hmstt.tar.gz
-        '''
-        archiveArtifacts artifacts: 'views-hmstt.tar.gz', fingerprint: true
-        stash includes: 'views-hmstt.tar.gz', name: 'views'
-      }
-    }
-
     stage('Deploy') {
       steps {
         // Ensure we have the built artifacts available in the workspace
@@ -69,10 +60,11 @@ pipeline {
               echo "Copying ${BINARY_NAME} and views to ${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_PATH}"
               # Create remote path if missing and copy files
               scp -o StrictHostKeyChecking=no ${BINARY_NAME} ${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_PATH}/
-              scp -o StrictHostKeyChecking=no views-hmstt.tar.gz ${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_PATH}/
+              scp -o -r StrictHostKeyChecking=no views/* ${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_PATH}/views/
               # Extract views on remote and set executable bit for binary
+              # Extract views and restart the service on the remote host. RESTART_WITH_SUDO controls whether sudo is used.
               ssh -o StrictHostKeyChecking=no ${REMOTE_USER}@${REMOTE_HOST} \
-                "mkdir -p ${REMOTE_PATH} && cd ${REMOTE_PATH} && tar -xzf views-hmstt.tar.gz && chmod +x ${BINARY_NAME}"
+                "mkdir -p ${REMOTE_PATH} && cd ${REMOTE_PATH} && chmod +x ${BINARY_NAME} && \"if [ '${RESTART_WITH_SUDO}' = 'true' ]; then sudo systemctl restart ${SERVICE_NAME}; else systemctl restart ${SERVICE_NAME}; fi\""
             '''
           }
         }
