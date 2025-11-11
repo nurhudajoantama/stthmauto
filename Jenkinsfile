@@ -20,6 +20,16 @@ pipeline {
       }
     }
 
+    stage('Setup Go Environment') {
+      steps {
+        sh '''
+          echo "Setting up Go environment"
+          go version
+          go mod tidy
+        '''
+      }
+    }
+
     stage('Build') {
       steps {
         sh '''
