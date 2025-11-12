@@ -6,22 +6,22 @@ import (
 	"gorm.io/gorm"
 )
 
-type hmsttStore struct {
+type HmsttStore struct {
 	db *gorm.DB
 }
 
-func NewStore(db *gorm.DB) *hmsttStore {
+func NewStore(db *gorm.DB) *HmsttStore {
 	// Auto migrate the hmsttState model
 	db.AutoMigrate(&hmsttState{})
 
-	return &hmsttStore{db: db}
+	return &HmsttStore{db: db}
 }
 
-func (s *hmsttStore) SetStateTx(ctx context.Context, tx *gorm.DB, state *hmsttState) error {
+func (s *HmsttStore) SetStateTx(ctx context.Context, tx *gorm.DB, state *hmsttState) error {
 	return tx.WithContext(ctx).Save(state).Error
 }
 
-func (s *hmsttStore) GetState(ctx context.Context, key string) (hmsttState, error) {
+func (s *HmsttStore) GetState(ctx context.Context, key string) (hmsttState, error) {
 	var state hmsttState
 	err := s.db.WithContext(ctx).First(&state, "key = ?", key).Error
 	if err != nil {
@@ -30,7 +30,7 @@ func (s *hmsttStore) GetState(ctx context.Context, key string) (hmsttState, erro
 	return state, nil
 }
 
-func (s *hmsttStore) GetAllStates(ctx context.Context) ([]hmsttState, error) {
+func (s *HmsttStore) GetAllStates(ctx context.Context) ([]hmsttState, error) {
 	var states []hmsttState
 	err := s.db.WithContext(ctx).Order("key asc").Find(&states).Error
 	if err != nil {
@@ -39,14 +39,14 @@ func (s *hmsttStore) GetAllStates(ctx context.Context) ([]hmsttState, error) {
 	return states, nil
 }
 
-func (s *hmsttStore) Transaction() (tx *gorm.DB) {
+func (s *HmsttStore) Transaction() (tx *gorm.DB) {
 	return s.db.Begin()
 }
 
-func (s *hmsttStore) Commit(tx *gorm.DB) error {
+func (s *HmsttStore) Commit(tx *gorm.DB) error {
 	return tx.Commit().Error
 }
 
-func (s *hmsttStore) Rollback(tx *gorm.DB) error {
+func (s *HmsttStore) Rollback(tx *gorm.DB) error {
 	return tx.Rollback().Error
 }

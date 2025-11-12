@@ -8,15 +8,15 @@ import (
 	"github.com/nurhudajoantama/stthmauto/app/server"
 )
 
-type hmsttHandler struct {
-	service   *hmsttService
+type HmsttHandler struct {
+	service   *HmsttService
 	templates *template.Template
 }
 
-func RegisterHandlers(s *server.Server, svc *hmsttService) {
+func RegisterHandlers(s *server.Server, svc *HmsttService) {
 	templates := template.Must(template.ParseGlob(HTML_TEMPLATE_PATTERN))
 
-	h := &hmsttHandler{
+	h := &HmsttHandler{
 		service:   svc,
 		templates: templates,
 	}
@@ -31,7 +31,7 @@ func RegisterHandlers(s *server.Server, svc *hmsttService) {
 	hmsttGroup.HandleFunc("/getstatevalue/{type}/{key}", h.handleGetState).Methods("GET")
 }
 
-func (h *hmsttHandler) handleGetState(w http.ResponseWriter, r *http.Request) {
+func (h *HmsttHandler) handleGetState(w http.ResponseWriter, r *http.Request) {
 	p := mux.Vars(r)
 	key := p["key"]
 	tipe := p["type"]
@@ -47,7 +47,7 @@ func (h *hmsttHandler) handleGetState(w http.ResponseWriter, r *http.Request) {
 }
 
 // handleIndex serves the main (and only) HTML page
-func (h *hmsttHandler) handleIndex(w http.ResponseWriter, r *http.Request) {
+func (h *HmsttHandler) handleIndex(w http.ResponseWriter, r *http.Request) {
 	// Provide a Servers slice to the template so index.html can render switch placeholders dynamically.
 	data := map[string]interface{}{
 		"states": []hmsttState{},
@@ -64,7 +64,7 @@ func (h *hmsttHandler) handleIndex(w http.ResponseWriter, r *http.Request) {
 }
 
 // handleState is another HTMX endpoint returning an HTML string
-func (h *hmsttHandler) handleGetStateHTML(w http.ResponseWriter, r *http.Request) {
+func (h *HmsttHandler) handleGetStateHTML(w http.ResponseWriter, r *http.Request) {
 	p := mux.Vars(r)
 	key := p["key"]
 	tipe := p["type"]
@@ -80,7 +80,7 @@ func (h *hmsttHandler) handleGetStateHTML(w http.ResponseWriter, r *http.Request
 	h.returnStateHTML(w, state)
 }
 
-func (h *hmsttHandler) handleSetStateHTML(w http.ResponseWriter, r *http.Request) {
+func (h *HmsttHandler) handleSetStateHTML(w http.ResponseWriter, r *http.Request) {
 	p := mux.Vars(r)
 	key := p["key"]
 	tipe := p["type"]
@@ -115,7 +115,7 @@ func (h *hmsttHandler) handleSetStateHTML(w http.ResponseWriter, r *http.Request
 	h.returnStateHTML(w, state)
 }
 
-func (h *hmsttHandler) returnStateHTML(w http.ResponseWriter, state hmsttState) {
+func (h *HmsttHandler) returnStateHTML(w http.ResponseWriter, state hmsttState) {
 	var templateData = state
 
 	templateFileName, ok := TYPE_TEMPLATES[state.Type]

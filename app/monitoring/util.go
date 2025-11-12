@@ -1,4 +1,4 @@
-package hmstt
+package monitoring
 
 import (
 	"context"
@@ -8,7 +8,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func PingInternet(address string) bool {
+func pingInternet(address string) bool {
 	pinger, err := probing.NewPinger(address)
 	if err != nil {
 		panic(err)

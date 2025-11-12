@@ -1,4 +1,4 @@
-package hmstt
+package monitoring
 
 import (
 	"context"
@@ -6,17 +6,21 @@ import (
 	"time"
 
 	"github.com/cenkalti/backoff/v4"
+	"github.com/nurhudajoantama/stthmauto/app/hmstt"
 	"github.com/nurhudajoantama/stthmauto/app/worker"
+	"github.com/nurhudajoantama/stthmauto/internal/config"
 	"github.com/rs/zerolog/log"
 )
 
-type hmsttWorker struct {
-	service *hmsttService
+type MonitoringWorker struct {
+	service       *hmstt.HmsttService
+	intercheckCfg config.InternetCheck
 }
 
-func RegisterWorkers(s *worker.Worker, svc *hmsttService) {
-	hw := &hmsttWorker{
-		service: svc,
+func RegisterWorkers(s *worker.Worker, svc *hmstt.HmsttService, intercheckCfg config.InternetCheck) {
+	hw := &MonitoringWorker{
+		service:       svc,
+		intercheckCfg: intercheckCfg,
 	}
 
 	s.Go(func(ctx context.Context) func() error {
@@ -24,9 +28,15 @@ func RegisterWorkers(s *worker.Worker, svc *hmsttService) {
 	})
 }
 
-func (w *hmsttWorker) internetWorker(ctx context.Context) func() error {
+func (w *MonitoringWorker) internetWorker(ctx context.Context) func() error {
 	return func() error {
-		ticker := time.NewTicker(INTERVAL_NET_CHECK * time.Second)
+		interval, err := time.ParseDuration(w.intercheckCfg.Interval)
+		if err != nil {
+			log.Error().Err(err).Msg("invalid internet check interval duration, using default 1 minute")
+			interval = 2 * time.Minute
+		}
+
+		ticker := time.NewTicker(interval)
 		defer ticker.Stop()
 
 		for {
@@ -35,7 +45,7 @@ func (w *hmsttWorker) internetWorker(ctx context.Context) func() error {
 				log.Info().Msg("hmstt internet worker stopped")
 				return nil
 			case <-ticker.C:
-				pingCheckNetOk := PingInternet(INTERNET_CHECK_ADDRESS)
+				pingCheckNetOk := pingInternet(w.intercheckCfg.CheckAddress)
 				if !pingCheckNetOk {
 					log.Print("modem connection is down, just wait")
 					err := w.internetWorkerSwitchModem(ctx)
@@ -48,7 +58,7 @@ func (w *hmsttWorker) internetWorker(ctx context.Context) func() error {
 	}
 }
 
-func (w *hmsttWorker) internetWorkerSwitchModem(ctx context.Context) error {
+func (w *MonitoringWorker) internetWorkerSwitchModem(ctx context.Context) error {
 	exp := backoff.NewExponentialBackOff()
 	exp.InitialInterval = 30 * time.Second
 	exp.MaxInterval = 10 * time.Minute
@@ -60,13 +70,13 @@ func (w *hmsttWorker) internetWorkerSwitchModem(ctx context.Context) error {
 
 	return backoff.Retry(func() error {
 
-		pingCheckModemOk := PingInternet(INTERNET_MODEM_ADDRESS)
+		pingCheckModemOk := pingInternet(w.intercheckCfg.ModemAddress)
 		if !pingCheckModemOk {
 			log.Print("modem connection is down")
 			return errors.New("modem connection is down, cannot restart modem (will retry)")
 		}
 
-		pingCheckNetOk := PingInternet(INTERNET_CHECK_ADDRESS)
+		pingCheckNetOk := pingInternet(w.intercheckCfg.CheckAddress)
 		if pingCheckNetOk {
 			log.Print("internet connection is down")
 			return nil

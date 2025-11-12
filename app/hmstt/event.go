@@ -9,18 +9,18 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-type hmsttEvent struct {
+type HmsttEvent struct {
 	ch *amqp.Channel
 }
 
-func NewEvent(conn *amqp.Connection) *hmsttEvent {
+func NewEvent(conn *amqp.Connection) *HmsttEvent {
 	ch := rabbitmq.NewRabbitMQChannel(conn)
-	return &hmsttEvent{
+	return &HmsttEvent{
 		ch: ch,
 	}
 }
 
-func (e *hmsttEvent) StateChange(ctx context.Context, key string, value string) error {
+func (e *HmsttEvent) StateChange(ctx context.Context, key string, value string) error {
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 

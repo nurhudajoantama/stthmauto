@@ -8,13 +8,13 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-type hmsttService struct {
-	store *hmsttStore
-	event *hmsttEvent
+type HmsttService struct {
+	store *HmsttStore
+	event *HmsttEvent
 }
 
-func NewService(hmsttStore *hmsttStore, hmsttEvent *hmsttEvent) *hmsttService {
-	return &hmsttService{
+func NewService(hmsttStore *HmsttStore, hmsttEvent *HmsttEvent) *HmsttService {
+	return &HmsttService{
 		store: hmsttStore,
 		event: hmsttEvent,
 	}
@@ -24,7 +24,7 @@ type GetStateResponse struct {
 	States string `json:"state"`
 }
 
-func (s *hmsttService) GetState(ctx context.Context, tipe, key string) (string, error) {
+func (s *HmsttService) GetState(ctx context.Context, tipe, key string) (string, error) {
 	generatedKey, ok := generateKey(tipe, key)
 	if !ok {
 		return "", errors.New("INVALID TYPE OR KEY")
@@ -38,7 +38,7 @@ func (s *hmsttService) GetState(ctx context.Context, tipe, key string) (string, 
 	return result.Value, nil
 }
 
-func (s *hmsttService) GetStateDetail(ctx context.Context, tipe, key string) (hmsttState, error) {
+func (s *HmsttService) GetStateDetail(ctx context.Context, tipe, key string) (hmsttState, error) {
 	generatedKey, ok := generateKey(tipe, key)
 	if !ok {
 		return hmsttState{}, errors.New("INVALID TYPE OR KEY")
@@ -52,7 +52,7 @@ func (s *hmsttService) GetStateDetail(ctx context.Context, tipe, key string) (hm
 	return result, nil
 }
 
-func (s *hmsttService) GetAllStates(ctx context.Context) ([]hmsttState, error) {
+func (s *HmsttService) GetAllStates(ctx context.Context) ([]hmsttState, error) {
 	results, err := s.store.GetAllStates(ctx)
 	if err != nil {
 		return nil, errors.New("GET ALL STATES ERROR")
@@ -61,7 +61,7 @@ func (s *hmsttService) GetAllStates(ctx context.Context) ([]hmsttState, error) {
 	return results, nil
 }
 
-func (s *hmsttService) SetState(ctx context.Context, tipe, key, value string) error {
+func (s *HmsttService) SetState(ctx context.Context, tipe, key, value string) error {
 	generatedKey, ok := canTypeChangedWithKey(tipe, key, value)
 	if !ok {
 		log.Error().Err(errors.New("INVALID TYPE OR KEY")).Msg("SetState failed")
@@ -95,7 +95,7 @@ func (s *hmsttService) SetState(ctx context.Context, tipe, key, value string) er
 	return nil
 }
 
-func (s *hmsttService) RestartModem(ctx context.Context) (err error) {
+func (s *HmsttService) RestartModem(ctx context.Context) (err error) {
 	err = s.SetState(ctx, PREFIX_SWITCH, MODEM_SWITCH_KEY, STATE_OFF)
 	if err != nil {
 		return

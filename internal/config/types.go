@@ -51,9 +51,17 @@ func (m MQTT) BrokerURL() string {
 	return fmt.Sprintf("amqp://%s:%s@%s:%s/", m.User, m.Password, m.Host, m.Port)
 }
 
+type InternetCheck struct {
+	CheckAddress string `yaml:"checkAddress"`
+	ModemAddress string `yaml:"modemAddress"`
+
+	Interval string `yaml:"interval"`
+}
+
 type Config struct {
-	HTTP TCPServer `yaml:"http"`
-	Log  Logging   `yaml:"log"`
-	DB   SQL       `yaml:"db"`
-	MQTT MQTT      `yaml:"mqtt"`
+	HTTP          TCPServer     `yaml:"http"`
+	Log           Logging       `yaml:"log"`
+	DB            SQL           `yaml:"db"`
+	MQTT          MQTT          `yaml:"mqtt"`
+	InternetCheck InternetCheck `yaml:"internetCheck"`
 }

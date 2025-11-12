@@ -19,9 +19,6 @@ const (
 
 	KEY_DELIMITER = "."
 
-	INTERNET_CHECK_ADDRESS = "1.1.1.0"    // pindah ke config atau storage nanti
-	INTERNET_MODEM_ADDRESS = "10.10.10.1" // pindah ke config atau storage nanti
-
 	INTERVAL_NET_CHECK = 120 // seconds
 )
 
