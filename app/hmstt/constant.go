@@ -6,8 +6,6 @@ const (
 	PREFIX_HMSTT  = "hmstt"
 	PREFIX_SWITCH = "switch"
 
-	MODEM_SWITCH_KEY = "server_1" // pindahin ke database nih biar gampang maintenance
-
 	HTML_TEMPLATE_PATTERN       = "views/hmstt/*.html"
 	HTML_TEMPLATE_SWITCH        = "switch.html"
 	HTML_TEMPLATE_NOTFOUND_TYPE = "notfoundtipe.html"

@@ -95,13 +95,13 @@ func (s *HmsttService) SetState(ctx context.Context, tipe, key, value string) er
 	return nil
 }
 
-func (s *HmsttService) RestartModem(ctx context.Context) (err error) {
-	err = s.SetState(ctx, PREFIX_SWITCH, MODEM_SWITCH_KEY, STATE_OFF)
+func (s *HmsttService) RestartSwitchByKey(ctx context.Context, key string) (err error) {
+	err = s.SetState(ctx, PREFIX_SWITCH, key, STATE_OFF)
 	if err != nil {
 		return
 	}
 
 	time.Sleep(500 * time.Millisecond)
-	err = s.SetState(ctx, PREFIX_SWITCH, MODEM_SWITCH_KEY, STATE_ON)
+	err = s.SetState(ctx, PREFIX_SWITCH, key, STATE_ON)
 	return
 }

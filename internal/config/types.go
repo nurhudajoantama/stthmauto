@@ -54,8 +54,8 @@ func (m MQTT) BrokerURL() string {
 type InternetCheck struct {
 	CheckAddress string `yaml:"checkAddress"`
 	ModemAddress string `yaml:"modemAddress"`
-
-	Interval string `yaml:"interval"`
+	Interval     string `yaml:"interval"`
+	SwitchKey    string `yaml:"switchKey"`
 }
 
 type Config struct {

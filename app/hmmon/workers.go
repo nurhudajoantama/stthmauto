@@ -1,4 +1,4 @@
-package monitoring
+package hmmon
 
 import (
 	"context"
@@ -12,13 +12,13 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-type MonitoringWorker struct {
+type HmmonWorker struct {
 	service       *hmstt.HmsttService
 	intercheckCfg config.InternetCheck
 }
 
 func RegisterWorkers(s *worker.Worker, svc *hmstt.HmsttService, intercheckCfg config.InternetCheck) {
-	hw := &MonitoringWorker{
+	hw := &HmmonWorker{
 		service:       svc,
 		intercheckCfg: intercheckCfg,
 	}
@@ -28,7 +28,7 @@ func RegisterWorkers(s *worker.Worker, svc *hmstt.HmsttService, intercheckCfg co
 	})
 }
 
-func (w *MonitoringWorker) internetWorker(ctx context.Context) func() error {
+func (w *HmmonWorker) internetWorker(ctx context.Context) func() error {
 	return func() error {
 		interval, err := time.ParseDuration(w.intercheckCfg.Interval)
 		if err != nil {
@@ -58,7 +58,7 @@ func (w *MonitoringWorker) internetWorker(ctx context.Context) func() error {
 	}
 }
 
-func (w *MonitoringWorker) internetWorkerSwitchModem(ctx context.Context) error {
+func (w *HmmonWorker) internetWorkerSwitchModem(ctx context.Context) error {
 	exp := backoff.NewExponentialBackOff()
 	exp.InitialInterval = 30 * time.Second
 	exp.MaxInterval = 10 * time.Minute
@@ -69,7 +69,6 @@ func (w *MonitoringWorker) internetWorkerSwitchModem(ctx context.Context) error 
 	bo := backoff.WithContext(exp, ctx)
 
 	return backoff.Retry(func() error {
-
 		pingCheckModemOk := pingInternet(w.intercheckCfg.ModemAddress)
 		if !pingCheckModemOk {
 			log.Print("modem connection is down")
@@ -84,7 +83,7 @@ func (w *MonitoringWorker) internetWorkerSwitchModem(ctx context.Context) error 
 
 		log.Print("internet connection is down, restarting modem")
 
-		err := w.service.RestartModem(ctx)
+		err := w.service.RestartSwitchByKey(ctx, w.intercheckCfg.SwitchKey)
 		if err != nil {
 			log.Printf("restart modem failed: %v (will retry)", err)
 			return err
