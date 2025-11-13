@@ -15,6 +15,7 @@ pipeline {
     SERVICE_NAME = "${env.SERVICE_NAME ?: 'hmstt'}"
   }
 
+
   stages {
     stage('Checkout') {
       steps {
