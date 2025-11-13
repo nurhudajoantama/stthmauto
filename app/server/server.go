@@ -87,6 +87,7 @@ func (s *Server) Start(ctx context.Context) error {
 
 // Shutdown gracefully shuts the server down within the provided context.
 func (s *Server) Shutdown(ctx context.Context) error {
+	log.Info().Msg("Shutting down HTTP server")
 	return s.httpServer.Shutdown(ctx)
 }
 
