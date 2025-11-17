@@ -7,7 +7,7 @@ import (
 )
 
 func pingInternet(address string) bool {
-	conn, err := net.Dial("tcp", "1.0.0.1:80")
+	conn, err := net.Dial("tcp", address+":80")
 	if err != nil {
 		log.Error().Err(err).Msg("pingInternet failed")
 		return false
