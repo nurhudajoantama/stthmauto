@@ -65,10 +65,10 @@ func (w *HmmonWorker) internetWorker(ctx context.Context) error {
 
 func (w *HmmonWorker) internetWorkerSwitchModem(ctx context.Context) error {
 	exp := backoff.NewExponentialBackOff()
-	exp.InitialInterval = 30 * time.Second
-	exp.MaxInterval = 10 * time.Minute
+	exp.InitialInterval = 3 * time.Minute
+	exp.MaxInterval = 20 * time.Minute
 	exp.MaxElapsedTime = 0
-	exp.RandomizationFactor = 0.3
+	exp.RandomizationFactor = 0.5
 	exp.Multiplier = 3.0
 
 	bo := backoff.WithContext(exp, ctx)
