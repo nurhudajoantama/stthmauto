@@ -34,6 +34,11 @@ func pingInternet(address string) bool {
 
 	stats := pinger.Statistics()
 
+	log.Debug().Msgf("Ping stats to %s: %+v", address, stats)
+	log.Debug().Msgf("Ping packets loss to %s: %.2f%%", address, stats.PacketLoss)
+	log.Debug().Msgf("Ping avg rtt to %s: %s", address, stats.AvgRtt.String())
+	log.Debug().Msgf("Ping min rtt to %s: %s", address, stats.MinRtt.String())
+
 	ok := stats.PacketsRecv > 0
 	if !ok {
 		log.Warn().Msgf("Internet ping to %s failed", address)
