@@ -5,7 +5,6 @@ go 1.25.0
 require (
 	github.com/cenkalti/backoff/v4 v4.3.0
 	github.com/gorilla/mux v1.8.1
-	github.com/prometheus-community/pro-bing v0.7.0
 	github.com/rabbitmq/amqp091-go v1.10.0
 	github.com/rs/zerolog v1.34.0
 	github.com/spf13/viper v1.21.0
