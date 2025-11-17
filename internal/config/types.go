@@ -58,10 +58,22 @@ type InternetCheck struct {
 	SwitchKey    string `yaml:"switchKey"`
 }
 
+type DiscordWebhook struct {
+	URL string `yaml:"url"`
+}
+
+func (d DiscordWebhook) WebhookUrl() string {
+	return d.URL
+}
+
 type Config struct {
 	HTTP          TCPServer     `yaml:"http"`
 	Log           Logging       `yaml:"log"`
 	DB            SQL           `yaml:"db"`
 	MQTT          MQTT          `yaml:"mqtt"`
 	InternetCheck InternetCheck `yaml:"internetCheck"`
+
+	DiscordWebhookError   DiscordWebhook `yaml:"discordWebhookError"`
+	DiscordWebhookWarning DiscordWebhook `yaml:"discordWebhookWarning"`
+	DiscordWebhookInfo    DiscordWebhook `yaml:"discordWebhookInfo"`
 }
